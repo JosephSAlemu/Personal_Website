@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   // Change this to your real domain once it's live.
   // It is only used for sitemap/canonical URLs.
-  site: 'https://www.josephalemu.com',
+  site: 'https://josephalemu.com',
 
   // Writes /skills/index.html instead of /skills.html
   // GoDaddy's Apache server serves these cleanly at /skills
