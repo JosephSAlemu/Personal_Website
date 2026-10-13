@@ -1,0 +1,31 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  intro?: string;
+  description?: string;
+}
+
+const { title, intro, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description ?? intro}>
+  <div class="page">
+    <h1>{title}</h1>
+    {intro && <p class="intro muted">{intro}</p>}
+    <hr class="rule" />
+    <slot />
+  </div>
+</BaseLayout>
+
+<style>
+  .intro {
+    font-size: 1.05rem;
+    margin-top: 0.7rem;
+  }
+
+  .rule {
+    margin: 1.5rem 0 2rem;
+  }
+</style>

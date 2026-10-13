@@ -1,0 +1,81 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+
+// EDIT: add, remove, or reorder groups and items freely.
+const groups = [
+  {
+    name: 'Languages',
+    items: ['C++', 'C', 'Java', 'Python', 'C#', 'Scala', 'Bash', 'Rust', 'JavaScript', 'HTML/CSS'],
+  },
+  {
+    name: 'HPC',
+    items: ['CUDA', 'OpenMP', 'Intel MPI', 'NVIDIA Nsight Compute', 'PBS Pro', 'Spack'],
+  },
+  {
+    name: 'Low Latency',
+    items: ['Intel VTune Profiler', 'CMake', 'GoogleTest', 'Valgrind'],
+  },
+  {
+    name: 'Machine Learning & AI',
+    items: ['NumPy', 'Pandas', 'scikit-learn', 'OpenCV', 'Plotly', 'LangChain', 'FastMCP'],
+  },
+  {
+    name: 'Web & Backend',
+    items: ['Spring Boot', 'Django', 'Next.js', 'Astro', 'PostgreSQL', 'MySQL', 'Postman'],
+  },
+  {
+    name: 'DevOps',
+    items: ['Git', 'GitHub Actions', 'Jenkins', 'Maven', 'JUnit 5', 'Docker Compose'],
+  },
+  {
+    name: 'Other',
+    items: ['Linux', 'Perforce', 'GDB'],
+  },
+];
+---
+
+<PageLayout
+  title="Skills"
+  intro="Tools and technologies I work with."
+>
+  {
+    groups.map((group) => (
+      <section class="group">
+        <h2>{group.name}</h2>
+        <ul>
+          {group.items.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</PageLayout>
+
+<style>
+  .group {
+    margin-bottom: 2rem;
+  }
+
+  h2 {
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.85rem;
+    font-size: 0.92rem;
+  }
+</style>

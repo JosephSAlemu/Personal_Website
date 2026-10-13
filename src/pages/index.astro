@@ -1,0 +1,181 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProfileCard from '../components/ProfileCard.astro';
+import { profile, badgeRows } from '../site.config';
+---
+
+<BaseLayout>
+  <div class="home-grid">
+    <ProfileCard />
+
+    <div>
+      <h1>{profile.name}</h1>
+
+      <p class="role">
+        <span>{profile.role}</span>
+        {
+          profile.roleLogo && (
+            <img
+              src={profile.roleLogo.src}
+              alt={profile.roleLogo.alt}
+              class="role-logo"
+              width="100"
+              height="100"
+            />
+          )
+        }
+      </p>
+
+      <p class="focus muted">{profile.focus}</p>
+
+      <div class="badges">
+        {
+          badgeRows.map((row) => (
+            <div class="badge-row">
+              <span class="badge-label">{row.label}</span>
+              <span class="badge-items">
+                {row.items.map((item) =>
+                  item.href ? (
+                    <a class="pill" href={item.href} target="_blank" rel="noopener">
+                      {item.logo && <img src={item.logo} alt="" />}
+                      {item.label}
+                    </a>
+                  ) : (
+                    <span class="pill">
+                      {item.logo && <img src={item.logo} alt="" />}
+                      {item.label}
+                    </span>
+                  )
+                )}
+              </span>
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- ============================================================
+           EDIT YOUR HOME PAGE TEXT BELOW.
+           Add or remove <section class="section"> blocks freely.
+           ============================================================ -->
+
+      <section class="section">
+        <h2>Who am I</h2>
+        <p>
+          I'm Joseph Alemu. I graduated from DePaul University in June 2026 with a bachelor's
+          degree in computer science, and I'm now a master's student at the University of
+          Chicago, studying computer science with a specialization in high-performance
+          computing.
+        </p>
+        <p>
+          My interests lie in HPC, GPU programming, low-latency engineering, and compilers. I
+          also enjoy video game development and 3D modeling, which I've been doing for about
+          six years now.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Technical Journey</h2>
+        <p>
+          My journey started in my senior year of high school, where I took a course in digital
+          electronics. That class had me building circuits on breadboards and soldering my own
+          designs onto PCBs. One of my proudest achievements was a circuit that displayed a
+          random number on an LCD display.
+        </p>
+        <p>
+          I carried that interest in hardware with me into my first year as a computer science
+          student at DePaul. Most of my first-year classes didn't hold my attention. Then I took
+          Systems, and I learned an enormous amount from it: assembly, ROP exploits, system
+          interrupts, caching, and a range of other compiler and OS concepts.
+        </p>
+        <p>
+          That course turned out to be a pivotal moment, and the catalyst for pursuing research.
+          Afterward I reached out to professors and landed a role as a systems research
+          assistant at DePaul, where I learned a great deal about C++, the stages of a JIT
+          compiler, and how large systems are built. Half a year in, I decided to explore other
+          fields.
+        </p>
+        <p>
+          That's what led me to Motorola Solutions. In 2025 I was accepted into the Motorola
+          Solutions Foundation Scholarship program at DePaul, where I ran into problems I had
+          never seen before — such as how to push millions of gene expressions through a long
+          data pipeline without it taking weeks.
+        </p>
+        <p>
+          Making progress on that work taught me the importance of maximizing the hardware you
+          already have, and of heterogeneous computing. That's what led me to high-performance
+          computing, where I am now.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Hobbies</h2>
+        <p>
+          I love 3D modeling. I started when I was 16, and bought myself a drawing tablet six
+          years ago as a reward for finishing a commission. I don't sculpt as much as I used to,
+          but I still open ZBrush whenever a character idea gets hold of me.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Contact me</h2>
+        <p class="asks">
+          Have an interesting project?<br />
+          Got a job offer?<br />
+          Have a question?<br />
+          Want to talk?
+        </p>
+        <p><a href={`mailto:${profile.email}`}>{profile.email}</a></p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .role {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.12rem;
+    margin: 0.5rem 0 0;
+    max-width: none;
+  }
+
+  .role-logo {
+    height: 34px;
+    width: auto;
+    flex: none;
+  }
+
+  .focus {
+    font-size: 1rem;
+    margin: 0.1rem 0 1.1rem;
+  }
+
+  .badges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .badge-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.7rem;
+  }
+
+  .badge-label {
+    font-size: 1.02rem;
+  }
+
+  .badge-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .asks {
+    margin-bottom: 0.6rem;
+  }
+</style>

@@ -1,0 +1,172 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import Entry from '../components/Entry.astro';
+import ArtEntry from '../components/ArtEntry.astro';
+import FilterBar from '../components/FilterBar.astro';
+import { software, art, optionsFor } from '../data/projects';
+
+// Edit the project lists in src/data/projects.ts.
+// These dropdown options build themselves from that data.
+const languageOptions = optionsFor(software, 'languages');
+const softwareToolOptions = optionsFor(software, 'tools');
+const artToolOptions = optionsFor(art, 'tools');
+const artSkillOptions = optionsFor(art, 'skills');
+---
+
+<PageLayout title="Projects" intro="Things I've built over the years, in code and in clay">
+  <div class="switcher" role="group" aria-label="Choose what to show">
+    <button type="button" data-view="software" aria-pressed="true">Software</button>
+    <button type="button" data-view="art" aria-pressed="false">3D art</button>
+  </div>
+
+  <!-- ===================== SOFTWARE ===================== -->
+  <section data-view-panel="software">
+    <FilterBar
+      scope="software"
+      noun="projects"
+      total={software.length}
+      facets={[
+        { key: 'languages', label: 'Languages', options: languageOptions },
+        { key: 'tools', label: 'Tools', options: softwareToolOptions },
+      ]}
+    />
+
+    <div data-filter-results="software">
+      {
+        software.map((p) => (
+          <div
+            data-filter-item
+            data-f-languages={p.languages.join('|')}
+            data-f-tools={p.tools.join('|')}
+          >
+            <Entry
+              title={p.title}
+              date={p.date}
+              meta={p.meta}
+              href={p.href ?? undefined}
+              languages={p.languages}
+              tools={p.tools}
+            >
+              {p.body.map((para) => (
+                <p>{para}</p>
+              ))}
+            </Entry>
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="empty muted" data-filter-empty="software" hidden>
+      Nothing matches those filters. Clear one to see more.
+    </p>
+  </section>
+
+  <!-- ====================== 3D ART ====================== -->
+  <section data-view-panel="art" hidden>
+    <FilterBar
+      scope="art"
+      noun="pieces"
+      total={art.length}
+      facets={[
+        { key: 'tools', label: 'Tools', options: artToolOptions },
+        { key: 'skills', label: 'Skills', options: artSkillOptions },
+      ]}
+    />
+
+    <div data-filter-results="art">
+      {
+        art.map((p) => (
+          <div data-filter-item data-f-tools={p.tools.join('|')} data-f-skills={p.skills.join('|')}>
+            <ArtEntry
+              title={p.title}
+              date={p.date}
+              meta={p.meta}
+              href={p.href ?? undefined}
+              tools={p.tools}
+              skills={p.skills}
+              media={p.media}
+              size={p.size}
+            >
+              {p.body.map((para) => (
+                <p>{para}</p>
+              ))}
+            </ArtEntry>
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="empty muted" data-filter-empty="art" hidden>
+      Nothing matches those filters. Clear one to see more.
+    </p>
+  </section>
+</PageLayout>
+
+<style>
+  .switcher {
+    display: inline-flex;
+    gap: 0.25rem;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--radius-pill);
+    padding: 0.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .switcher button {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+    border-radius: var(--radius-pill);
+    padding: 0.45rem 1.1rem;
+    cursor: pointer;
+  }
+
+  .switcher button:hover {
+    color: var(--text);
+  }
+
+  .switcher button[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .empty {
+    padding: 2rem 0;
+  }
+
+  /* Last visible entry shouldn't carry a dangling divider */
+  [data-filter-results] > div:last-child :global(.entry) {
+    border-bottom: 0;
+  }
+</style>
+
+<script>
+  const buttons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('.switcher button[data-view]')
+  );
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-view-panel]'));
+
+  function show(view: string, pushUrl = true) {
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+    panels.forEach((p) => (p.hidden = p.dataset.viewPanel !== view));
+
+    if (pushUrl) {
+      const url = new URL(window.location.href);
+      if (view === 'software') url.searchParams.delete('view');
+      else url.searchParams.set('view', view);
+      history.replaceState(null, '', url);
+    }
+  }
+
+  buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.view!)));
+
+  // Allow linking straight to /projects?view=art
+  const requested = new URL(window.location.href).searchParams.get('view');
+  if (requested && panels.some((p) => p.dataset.viewPanel === requested)) {
+    show(requested, false);
+  }
+</script>

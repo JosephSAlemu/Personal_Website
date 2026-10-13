@@ -1,0 +1,107 @@
+---
+import StackRows from './StackRows.astro';
+
+interface Props {
+  title: string;
+  /** Organisation, venue, journal, or project role */
+  meta?: string;
+  /** Free text date or range, e.g. "June 2025" or "2023 – 2025" */
+  date?: string;
+  href?: string;
+  /** Programming languages — shown as filled pills */
+  languages?: string[];
+  /** Frameworks, libraries, databases, software — outlined pills */
+  tools?: string[];
+  /** Unlabelled tags, for pages that don't need the split */
+  tags?: string[];
+}
+
+const { title, meta, date, href, languages = [], tools = [], tags = [] } = Astro.props;
+---
+
+<article class="entry">
+  <div class="head">
+    <h3>
+      {
+        href ? (
+          <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener">
+            {title}
+          </a>
+        ) : (
+          title
+        )
+      }
+    </h3>
+    {date && <span class="date muted">{date}</span>}
+  </div>
+
+  {meta && <p class="meta muted">{meta}</p>}
+
+  <div class="body"><slot /></div>
+
+  <StackRows
+    rows={[
+      { label: 'Languages', items: languages, variant: 'fill' },
+      { label: 'Tools', items: tools, variant: 'line' },
+    ]}
+  />
+
+  {
+    tags.length > 0 && (
+      <ul class="tags">
+        {tags.map((t) => (
+          <li class="tag">{t}</li>
+        ))}
+      </ul>
+    )
+  }
+</article>
+
+<style>
+  .entry {
+    padding: 1.1rem 0 1.4rem;
+    border-bottom: 1px solid var(--surface-line);
+  }
+
+  .head {
+    display: flex;
+    gap: 0.5rem 1.25rem;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  h3 {
+    margin: 0;
+  }
+
+  .date {
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .meta {
+    font-size: 0.92rem;
+    margin: 0.15rem 0 0;
+  }
+
+  .body :global(p) {
+    margin: 0.5rem 0 0;
+  }
+
+  .body :global(ul) {
+    margin: 0.5rem 0 0;
+    padding-left: 1.2rem;
+    max-width: var(--measure);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0.7rem 0 0;
+    padding: 0;
+  }
+</style>

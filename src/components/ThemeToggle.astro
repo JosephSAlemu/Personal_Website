@@ -1,0 +1,85 @@
+---
+// Light/dark switch. The initial theme is set in BaseLayout's head
+// script so there is no flash of the wrong colours on load.
+---
+
+<button id="theme-toggle" type="button" aria-label="Switch to light mode">
+  <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linejoin="round"></path>
+  </svg>
+  <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+    <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3"></path>
+      <path d="M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6"></path>
+    </g>
+  </svg>
+</button>
+
+<style>
+  button {
+    flex: none;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  button:hover {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Dark theme shows the sun (what you'd switch to), light shows the moon */
+  .icon-moon {
+    display: none;
+  }
+  :global(:root[data-theme='light']) .icon-moon {
+    display: block;
+  }
+  :global(:root[data-theme='light']) .icon-sun {
+    display: none;
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById('theme-toggle');
+
+  function label(theme: string) {
+    return theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+  }
+
+  toggle?.setAttribute(
+    'aria-label',
+    label(document.documentElement.dataset.theme ?? 'dark')
+  );
+
+  toggle?.addEventListener('click', () => {
+    const next =
+      document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    toggle.setAttribute('aria-label', label(next));
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* private browsing: the choice just won't persist */
+    }
+  });
+</script>

@@ -1,0 +1,347 @@
+---
+// A row of multi-select dropdowns that filter the items in
+// [data-filter-results="{scope}"] on the same page.
+//
+// Within one dropdown, selections are OR (match any).
+// Across dropdowns, they are AND (must match in every dropdown).
+
+interface Facet {
+  /** Matches the data-f-{key} attribute on each item */
+  key: string;
+  label: string;
+  options: string[];
+}
+
+interface Props {
+  scope: string;
+  facets: Facet[];
+  /** Plural word used in the result count, e.g. "projects" */
+  noun: string;
+  /** Singular form. Defaults to `noun` with a trailing "s" removed. */
+  nounOne?: string;
+  total: number;
+}
+
+const { scope, facets, noun, total } = Astro.props;
+const nounOne = Astro.props.nounOne ?? noun.replace(/s$/, '');
+---
+
+<div class="filters" data-filter-scope={scope}>
+  {
+    facets
+      .filter((f) => f.options.length > 0)
+      .map((facet) => (
+        <div class="facet" data-facet={facet.key}>
+          <button
+            type="button"
+            data-facet-toggle
+            aria-expanded="false"
+            aria-controls={`${scope}-${facet.key}-panel`}
+          >
+            <span>{facet.label}</span>
+            <span class="badge" data-facet-count hidden></span>
+            <svg viewBox="0 0 12 8" aria-hidden="true" class="chev">
+              <path
+                d="M1 1.5 6 6.5l5-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+
+          <div class="panel" id={`${scope}-${facet.key}-panel`} data-facet-panel hidden>
+            <fieldset>
+              <legend class="visually-hidden">Filter by {facet.label}</legend>
+              {facet.options.map((opt) => (
+                <label>
+                  <input type="checkbox" value={opt} />
+                  <span>{opt}</span>
+                </label>
+              ))}
+            </fieldset>
+            <button type="button" class="panel-clear" data-facet-clear hidden>
+              Clear {facet.label.toLowerCase()}
+            </button>
+          </div>
+        </div>
+      ))
+  }
+
+  <button type="button" class="clear-all" data-clear-all hidden>Clear all</button>
+
+  <p
+    class="count muted"
+    data-count
+    data-noun={noun}
+    data-noun-one={nounOne}
+    aria-live="polite"
+  >
+    {total} {total === 1 ? nounOne : noun}
+  </p>
+</div>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .facet {
+    position: relative;
+  }
+
+  [data-facet-toggle] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--radius-pill);
+    padding: 0.4rem 0.85rem;
+    cursor: pointer;
+  }
+
+  [data-facet-toggle]:hover {
+    border-color: var(--accent);
+  }
+
+  [data-facet-toggle][aria-expanded='true'] {
+    border-color: var(--accent);
+  }
+
+  .badge {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 0.25rem;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chev {
+    width: 10px;
+    height: 7px;
+    color: var(--text-muted);
+    transition: transform 0.15s ease;
+  }
+
+  [data-facet-toggle][aria-expanded='true'] .chev {
+    transform: rotate(180deg);
+  }
+
+  /* dropdown panel */
+  .panel {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    z-index: 20;
+    min-width: 13rem;
+    max-height: 17rem;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--surface-line);
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.35);
+    padding: 0.4rem;
+  }
+
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .panel label {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.88rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .panel label:hover {
+    background: var(--surface);
+  }
+
+  .panel input {
+    accent-color: var(--accent);
+    width: 15px;
+    height: 15px;
+    flex: none;
+    margin: 0;
+  }
+
+  .panel-clear,
+  .clear-all {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-link);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 9px;
+  }
+
+  .panel-clear {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border-top: 1px solid var(--surface-line);
+    border-radius: 0;
+    margin-top: 0.3rem;
+    padding-top: 0.55rem;
+  }
+
+  .clear-all:hover,
+  .panel-clear:hover {
+    background: var(--surface);
+  }
+
+  .count {
+    margin: 0 0 0 auto;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 520px) {
+    .count {
+      margin-left: 0;
+      width: 100%;
+    }
+    .panel {
+      min-width: min(16rem, calc(100vw - 3rem));
+    }
+  }
+</style>
+
+<script>
+  // One handler for every filter bar on the page.
+  const scopes = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-filter-scope]')
+  );
+
+  function closeAllPanels() {
+    document.querySelectorAll<HTMLElement>('[data-facet-panel]').forEach((p) => {
+      p.hidden = true;
+    });
+    document.querySelectorAll('[data-facet-toggle]').forEach((b) => {
+      b.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  for (const scope of scopes) {
+    const name = scope.dataset.filterScope!;
+    const results = document.querySelector<HTMLElement>(`[data-filter-results="${name}"]`);
+    if (!results) continue;
+
+    const items = Array.from(results.querySelectorAll<HTMLElement>('[data-filter-item]'));
+    const facets = Array.from(scope.querySelectorAll<HTMLElement>('[data-facet]'));
+    const countEl = scope.querySelector<HTMLElement>('[data-count]');
+    const clearAllBtn = scope.querySelector<HTMLElement>('[data-clear-all]');
+    const emptyEl = document.querySelector<HTMLElement>(`[data-filter-empty="${name}"]`);
+    const noun = countEl?.dataset.noun ?? 'items';
+    const nounOne = countEl?.dataset.nounOne ?? noun.replace(/s$/, '');
+
+    const checkedIn = (facet: HTMLElement) =>
+      Array.from(facet.querySelectorAll<HTMLInputElement>('input:checked')).map((i) => i.value);
+
+    function apply() {
+      const active: { key: string; selected: string[] }[] = [];
+
+      for (const facet of facets) {
+        const selected = checkedIn(facet);
+        active.push({ key: facet.dataset.facet!, selected });
+
+        const badge = facet.querySelector<HTMLElement>('[data-facet-count]');
+        if (badge) {
+          badge.textContent = String(selected.length);
+          badge.hidden = selected.length === 0;
+        }
+        const facetClear = facet.querySelector<HTMLElement>('[data-facet-clear]');
+        if (facetClear) facetClear.hidden = selected.length === 0;
+      }
+
+      let shown = 0;
+      for (const item of items) {
+        const visible = active.every(({ key, selected }) => {
+          if (selected.length === 0) return true;
+          const values = (item.getAttribute(`data-f-${key}`) ?? '').split('|').filter(Boolean);
+          return selected.some((v) => values.includes(v));
+        });
+        item.hidden = !visible;
+        if (visible) shown += 1;
+      }
+
+      const anyActive = active.some((a) => a.selected.length > 0);
+      if (clearAllBtn) clearAllBtn.hidden = !anyActive;
+      if (countEl) {
+        countEl.textContent = anyActive
+          ? `${shown} of ${items.length} ${noun}`
+          : `${items.length} ${items.length === 1 ? nounOne : noun}`;
+      }
+      if (emptyEl) emptyEl.hidden = shown !== 0;
+    }
+
+    for (const facet of facets) {
+      const toggle = facet.querySelector<HTMLButtonElement>('[data-facet-toggle]');
+      const panel = facet.querySelector<HTMLElement>('[data-facet-panel]');
+      if (!toggle || !panel) continue;
+
+      toggle.addEventListener('click', () => {
+        const wasOpen = toggle.getAttribute('aria-expanded') === 'true';
+        closeAllPanels();
+        if (!wasOpen) {
+          toggle.setAttribute('aria-expanded', 'true');
+          panel.hidden = false;
+        }
+      });
+
+      panel.addEventListener('change', apply);
+
+      facet.querySelector('[data-facet-clear]')?.addEventListener('click', () => {
+        panel
+          .querySelectorAll<HTMLInputElement>('input:checked')
+          .forEach((i) => (i.checked = false));
+        apply();
+      });
+    }
+
+    clearAllBtn?.addEventListener('click', () => {
+      scope
+        .querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked')
+        .forEach((i) => (i.checked = false));
+      closeAllPanels();
+      apply();
+    });
+
+    apply();
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('[data-facet]')) closeAllPanels();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const open = document.querySelector<HTMLElement>('[data-facet-toggle][aria-expanded="true"]');
+    closeAllPanels();
+    open?.focus();
+  });
+</script>

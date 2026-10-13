@@ -1,0 +1,118 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+// Group by year, newest first
+const years = [...new Set(posts.map((p) => p.data.date.getFullYear()))].sort((a, b) => b - a);
+
+const fmt = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: '2-digit',
+  timeZone: 'UTC',
+});
+---
+
+<PageLayout
+  title="Blogs"
+  intro="Notes on accelerated computing, compilers, and whatever else I am taking apart."
+>
+  {
+    years.map((year) => (
+      <section class="year">
+        <h2>{year}</h2>
+        <ul>
+          {posts
+            .filter((p) => p.data.date.getFullYear() === year)
+            .map((post) => (
+              <li>
+                <time datetime={post.data.date.toISOString()}>{fmt.format(post.data.date)}</time>
+                <div>
+                  <a href={`/blog/${post.id}`}>{post.data.title}</a>
+                  {post.data.description && <p class="muted">{post.data.description}</p>}
+                  {post.data.tags.length > 0 && (
+                    <ul class="tags">
+                      {post.data.tags.map((t) => (
+                        <li class="tag">{t}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </li>
+            ))}
+        </ul>
+      </section>
+    ))
+  }
+
+  {posts.length === 0 && <p class="muted">No posts yet.</p>}
+</PageLayout>
+
+<style>
+  .year {
+    margin-bottom: 2.25rem;
+  }
+
+  .year > h2 {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--surface-line);
+    margin-bottom: 0.4rem;
+  }
+
+  .year > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .year > ul > li {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.85rem 0;
+  }
+
+  time {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.15rem;
+  }
+
+  .year a {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+
+  .year a:hover {
+    color: var(--accent-link);
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+    font-size: 0.93rem;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0.45rem 0 0;
+    padding: 0;
+  }
+
+  @media (max-width: 560px) {
+    .year > ul > li {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+  }
+</style>

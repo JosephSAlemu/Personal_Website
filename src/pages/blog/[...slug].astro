@@ -1,0 +1,204 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+
+// Build a numbered outline (1, 1.1, 2 ...) from the h2/h3 headings,
+// the way Lei Mao's posts are organised.
+const outline = headings.filter((h) => h.depth === 2 || h.depth === 3);
+let major = 0;
+let minor = 0;
+const toc = outline.map((h) => {
+  if (h.depth === 2) {
+    major += 1;
+    minor = 0;
+    return { ...h, number: `${major}` };
+  }
+  minor += 1;
+  return { ...h, number: `${major}.${minor}` };
+});
+
+const fmt = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <div class="post-grid">
+    <article>
+      <h1>{post.data.title}</h1>
+
+      <p class="meta muted">
+        <time datetime={post.data.date.toISOString()}>{fmt.format(post.data.date)}</time>
+        {post.data.updated && <span>· updated {fmt.format(post.data.updated)}</span>}
+      </p>
+
+      {
+        post.data.tags.length > 0 && (
+          <ul class="tags">
+            {post.data.tags.map((t) => (
+              <li class="tag">{t}</li>
+            ))}
+          </ul>
+        )
+      }
+
+      <hr class="rule" />
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      <hr class="rule" />
+      <p><a href="/blog">← All posts</a></p>
+    </article>
+
+    {
+      toc.length > 1 && (
+        <nav class="toc" aria-label="Contents">
+          <p class="toc-head">Contents</p>
+          <ol>
+            {toc.map((h) => (
+              <li data-depth={h.depth}>
+                <a href={`#${h.slug}`}>
+                  <span class="num">{h.number}</span>
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .post-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 232px;
+    gap: clamp(1.5rem, 5vw, 3.5rem);
+    align-items: start;
+    padding-top: clamp(4.5rem, 9vw, 6rem);
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  article {
+    min-width: 0;
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 3.6vw, 2.35rem);
+  }
+
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.92rem;
+    margin: 0.6rem 0 0;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0.7rem 0 0;
+    padding: 0;
+  }
+
+  /* Table of contents */
+  .toc {
+    position: sticky;
+    top: 6rem;
+    font-size: 0.9rem;
+    border-left: 1px solid var(--surface-line);
+    padding-left: 1.1rem;
+  }
+
+  .toc-head {
+    font-family: var(--font-display);
+    font-weight: 600;
+    margin: 0 0 0.6rem;
+    color: var(--text-muted);
+  }
+
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc li[data-depth='3'] {
+    padding-left: 1rem;
+  }
+
+  .toc a {
+    display: flex;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    padding: 0.22rem 0;
+    line-height: 1.35;
+  }
+
+  .toc a:hover,
+  .toc a.active {
+    color: var(--accent-link);
+    text-decoration: none;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    flex: none;
+  }
+
+  @media (max-width: 900px) {
+    .post-grid {
+      grid-template-columns: 1fr;
+    }
+    .toc {
+      position: static;
+      order: -1;
+      border-left: 0;
+      padding-left: 0;
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      padding: 1rem 1.2rem;
+    }
+  }
+</style>
+
+<script>
+  // Highlight the section you're reading
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc a'));
+  const targets = links
+    .map((a) => document.querySelector(decodeURIComponent(a.hash)))
+    .filter((el): el is Element => Boolean(el));
+
+  if (targets.length) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          links.forEach((a) => a.classList.remove('active'));
+          const match = links.find((a) => decodeURIComponent(a.hash) === `#${entry.target.id}`);
+          match?.classList.add('active');
+        }
+      },
+      { rootMargin: '-80px 0px -70% 0px' }
+    );
+    targets.forEach((t) => observer.observe(t));
+  }
+</script>

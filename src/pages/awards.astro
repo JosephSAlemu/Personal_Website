@@ -1,0 +1,60 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import Entry from '../components/Entry.astro';
+
+// EDIT: one object per award.
+const awards = [
+  {
+    title: 'Merit Scholarship',
+    date: 'June 2026',
+    meta: 'University of Chicago',
+    body: 'Applied for and received a competitive merit scholarship toward my UChicago master’s in computer science.',
+  },
+  {
+    title: 'Dean\'s List',
+    date: 'August 2022 – June 2026',
+    meta: 'DePaul University, College of Computing and Digital Media',
+    body: 'Awarded for maintaining a GPA above the college’s 3.5 threshold in every quarter.',
+  },
+  {
+    title: 'IEEE ICBCB 2026 Presenter',
+    date: 'March 2026',
+    meta: 'Kyushu Institute of Technology',
+    body: 'Presented my first-author paper at ICBCB 2026.',
+  },
+  {
+    title: 'Motorola Solutions Foundation Scholar Grant',
+    date: 'January 2025 – January 2026',
+    meta: 'DePaul University',
+    body: 'One of five students given a $5,000 grant from Motorola Solutions to pursue machine learning research.',
+  },
+  {
+    title: 'McNair Scholar Summer Research Stipend',
+    date: 'June 2025 – August 2025',
+    meta: 'DePaul University',
+    body: 'A $2,800 stipend from the McNair Scholars program to continue my research over the summer.',
+  },
+  {
+    title: 'IEEE RTC 2023 Guest Speaker',
+    date: 'October 2023',
+    meta: 'Illinois Institute of Technology',
+    body: 'Invited to speak at the 2023 IEEE RTC Conference after winning HackRTC with SentimentSolved.',
+  },
+  {
+    title: '2023 HackRTC Winner',
+    date: 'October 2023',
+    meta: 'Illinois Institute of Technology',
+    body: 'Won first place at HackRTC with SentimentSolved.',
+  },
+];
+---
+
+<PageLayout title="Awards" intro="Recognition and funding I have received.">
+  {
+    awards.map((a) => (
+      <Entry title={a.title} date={a.date} meta={a.meta}>
+        <p>{a.body}</p>
+      </Entry>
+    ))
+  }
+</PageLayout>
