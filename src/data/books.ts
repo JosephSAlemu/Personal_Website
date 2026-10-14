@@ -32,7 +32,7 @@ export const ongoing: OngoingBook[] = [
     title: 'The C++ Programming Language, 4th Edition',
     author: 'Bjarne Stroustrup',
     bookmark: 'Chapter 2 — A Tour of C++: The Basics',
-    page: 50,
+    page: 60,
     pages: 1277,
     lastRead: '2026-10-12',
     note: 'Trying to hammer down my foundations in C++.',
